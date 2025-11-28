@@ -19,45 +19,50 @@ function Theme() {
         mode = "dark";
         body.classList.add("dark");
         body.classList.remove("light");
-        themeBtn.classList.add("light");
-        card.classList.add("light");
+        themeBtn.textContent = "☀️ Theme";
     } else {
         mode = "light";
         body.classList.add("light");
         body.classList.remove("dark");
+        themeBtn.textContent = "🌙 Theme";
     }
 };
 
 function checkGuess() {
     let userInp = Number(inputNum.value);
-    console.log(randomNum);
+    
+    if(!inputNum.value || userInp < 1 || userInp > 100) {
+        showResult.classList.remove("alert-success", "alert-danger", "alert-warning");
+        showResult.classList.add("alert-warning");
+        showResult.textContent = "Please enter a number between 1 and 100!";
+        return;
+    }
 
     if(count === 1) {
-        text.textContent = "Previous Numbers: ";
-        alert("You have only 9 tries left");
+        text.textContent = "Previous Guesses: ";
     }
 
     text.textContent = text.textContent + userInp + " ";
 
     if(userInp === randomNum) {
+      showResult.classList.remove("alert-warning", "alert-danger");
       showResult.classList.add("alert-success");
-      showResult.textContent = "Congratulations! You Guess it Right";
+      showResult.textContent = "🎉 Congratulations! You guessed it right in " + count + " tries!";
       gameOver();
     } else if(count === 10) {
-        console.log("User input:", userInp);
-        console.log("Random number:", randomNum);
+        showResult.classList.remove("alert-warning", "alert-success");
         showResult.classList.add("alert-danger");
-        showResult.textContent = "!!! GAME OVER !!!";
+        showResult.textContent = "😢 Game Over! The number was " + randomNum;
         gameOver();
     } else {
-
+        showResult.classList.remove("alert-success", "alert-danger");
         if(userInp > randomNum) {
             showResult.classList.add("alert-warning");
-            showResult.textContent = "Your guess is too High!"; 
+            showResult.textContent = "📈 Too High! Try a lower number. (" + (10 - count) + " tries left)"; 
 
         } else if(userInp < randomNum) {
             showResult.classList.add("alert-warning");
-            showResult.textContent = "Your guess is too Low!";
+            showResult.textContent = "📉 Too Low! Try a higher number. (" + (10 - count) + " tries left)";
         }
     }
 
@@ -79,32 +84,32 @@ function gameOver() {
 }
 
 function playAgain() {
-    try {
-        inputNum.disabled = false;
-        guessBtn.disabled = false;
-
+    inputNum.disabled = false;
+    guessBtn.disabled = false;
     inputNum.value = "";
     showResult.textContent = "";
     showResult.classList.remove("alert-success", "alert-danger", "alert-warning");
-    BtnSet.removeChild(resetBtn);
+    if(resetBtn && resetBtn.parentElement) {
+        resetBtn.remove();
+        resetBtn = null;
+    }
     text.textContent = "Welcome to the Game!";
     inputNum.focus();
     randomNum = Math.floor(Math.random() * 100) + 1;
     count = 1;
-    } catch(err) {
-        console.log(`error is : ${err}`);
-    };
 }
 
 function quitGame() {   
     inputNum.value = "";
+    inputNum.disabled = false;
+    guessBtn.disabled = false;
     showResult.textContent = "";
     showResult.classList.remove("alert-success", "alert-danger", "alert-warning");
     text.textContent = "Welcome to the Game!";
-    if(resetBtn) {
-    resetBtn.parentElement.remove();
+    if(resetBtn && resetBtn.parentElement) {
+        resetBtn.remove();
+        resetBtn = null;
     }
-    showResult.classList.remove("alert-warning");
     inputNum.focus();
     randomNum = Math.floor(Math.random() * 100) + 1;
     count = 1; 
@@ -113,3 +118,10 @@ function quitGame() {
 quitBtn.addEventListener("click", quitGame);
 
 guessBtn.addEventListener("click", checkGuess);
+
+// Allow pressing Enter to submit guess
+inputNum.addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        checkGuess();
+    }
+});
